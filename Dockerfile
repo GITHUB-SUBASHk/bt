@@ -1,5 +1,4 @@
-# Use official PHP 8.2 image with FPM
-FROM php:8.2-fpm
+FROM php:8.1-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -12,28 +11,29 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
-# ✅ Copy the entire project first
+# Create missing Laravel required folders
+RUN mkdir -p /var/www/storage /var/www/bootstrap/cache
+
+# Copy app source code
 COPY . .
 
-# ✅ Install PHP dependencies (after project files are in)
-RUN composer install --no-dev --optimize-autoloader
-
-# Set proper permissions
+# Set folder permissions
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/storage
 
-# Create .env file if missing (optional fallback)
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Copy .env if not already present
 RUN cp .env.example .env || true
 
-# Generate Laravel app key
+# Laravel commands
 RUN php artisan key:generate
+RUN php artisan config:cache || true
+RUN php artisan route:cache || true
 
-# Cache config and routes
-RUN php artisan config:cache \
-    && php artisan route:cache || true
-
-# Expose port
+# Expose Laravel development server port
 EXPOSE 8000
 
-# Run Laravel dev server
+# Start Laravel dev server
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
