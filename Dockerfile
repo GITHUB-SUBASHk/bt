@@ -27,7 +27,7 @@ RUN cp .env.example .env || true
 
 # Laravel setup
 RUN composer install --no-dev --optimize-autoloader
-RUN php artisan key:generate
+RUN php artisan key:generate --show
 RUN php artisan migrate --force
 RUN php artisan config:cache || true
 RUN php artisan route:cache || true
