@@ -19,5 +19,16 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    // ✅ This method will catch and return all unhandled errors as JSON
+    public function render($request, Throwable $exception)
+    {
+        return response()->json([
+            'error' => true,
+            'message' => $exception->getMessage(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+        ], 500);
+    }
 }
 ?>
