@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Models\User;
@@ -30,60 +31,51 @@ Route::middleware('auth:sanctum')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-// ✅ Setup test user, simulate full flow: register, verify, set password
+// ✅ Test if backend is alive
+Route::get('/ping', function () {
+    return response()->json(['status' => 'alive 🟢']);
+});
+
+// ✅ Manual user creation for testing (avoids Http::post())
 Route::get('/__test-setup-user', function () {
     $email = 'testuser' . rand(1000, 9999) . '@example.com';
+    $token = Str::random(40);
 
-    // 1. Register
-    $registerResponse = Http::post(url('/api/register'), [
+    $user = User::create([
         'name' => 'Test User',
-        'email' => $email
-    ]);
-
-    // 2. Get token from DB
-    $user = User::where('email', $email)->first();
-    if (!$user) return response()->json(['error' => 'User not created'], 500);
-
-    $token = $user->email_token;
-
-    // 3. Verify
-    Http::get(url("/api/verify-email/{$token}"));
-
-    // 4. Set password
-    $password = 'Test@1234';
-    Http::post(url('/api/set-password'), [
         'email' => $email,
-        'password' => $password,
-        'password_confirmation' => $password
+        'email_token' => $token,
+        'email_verified_at' => now(),
+        'password' => Hash::make('Test@1234')
     ]);
 
     return response()->json([
         'email' => $email,
-        'password' => $password,
-        'message' => 'Test user registered and password set successfully ✅'
+        'password' => 'Test@1234',
+        'token' => $token,
+        'message' => 'User created successfully ✅'
     ]);
 });
 
-// ✅ Login test user via browser
+// ✅ Direct login attempt with created user
 Route::get('/__test-login', function () {
     $email = request()->query('email');
     $password = request()->query('password');
 
-    $res = Http::post(url('/api/login'), [
-        'email' => $email,
-        'password' => $password
+    $user = User::where('email', $email)->first();
+    if (!$user) {
+        return response()->json(['error' => 'User not found ❌'], 404);
+    }
+
+    if (!Hash::check($password, $user->password)) {
+        return response()->json(['error' => 'Invalid password ❌'], 401);
+    }
+
+    $token = $user->createToken('test-login')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Login successful ✅',
+        'token' => $token,
+        'user' => $user->only(['id', 'email', 'name']),
     ]);
-
-    return $res->json();
-});
-
-// ✅ Test OTP send
-Route::get('/__test-forgot', function () {
-    $email = request()->query('email');
-
-    $res = Http::post(url('/api/forgot-password'), [
-        'email' => $email
-    ]);
-
-    return $res->json();
 });
