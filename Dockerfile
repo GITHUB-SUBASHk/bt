@@ -8,14 +8,14 @@ RUN apt-get update && apt-get install -y \
 # Install Composer globally
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN php artisan config:clear && php artisan route:clear && php artisan cache:clear
-
-
 # Set working directory
 WORKDIR /var/www
 
 # Copy app source code
 COPY . .
+
+# Clear config + route + cache AFTER copying source
+RUN php artisan config:clear && php artisan route:clear && php artisan cache:clear
 
 # Create required folders and database file
 RUN mkdir -p storage bootstrap/cache database \
@@ -30,7 +30,10 @@ RUN cp .env.example .env || true
 
 # Laravel setup
 RUN composer install --no-dev --optimize-autoloader
-#RUN php artisan key:generate
+
+# Optional: Set static key here or through Render env var
+# RUN php artisan key:generate
+
 RUN php artisan migrate --force
 RUN php artisan config:cache || true
 RUN php artisan route:cache || true
