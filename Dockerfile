@@ -29,6 +29,7 @@ RUN cp .env.example .env || true
 
 # Laravel commands
 RUN php artisan key:generate
+RUN php artisan migrate --force 
 RUN php artisan config:cache || true
 RUN php artisan route:cache || true
 
