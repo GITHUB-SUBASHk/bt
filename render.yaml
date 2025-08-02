@@ -2,15 +2,13 @@ services:
   - type: web
     name: laravel-backend
     runtime: docker
-    region: singapore
     plan: free
+    region: singapore
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
-      - key: APP_KEY
-        generateValue: true
       - key: APP_URL
         value: https://your-laravel-backend.onrender.com
       - key: DB_CONNECTION
