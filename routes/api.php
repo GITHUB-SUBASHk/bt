@@ -32,7 +32,11 @@ Route::middleware('auth:sanctum')->group(function () {
 */
 
 Route::get('/__logs', function () {
-    return response()->file(storage_path('logs/laravel.log'));
+    $logPath = storage_path('logs/laravel.log');
+    if (!file_exists($logPath)) {
+        return response()->json(['error' => 'Log file does not exist'], 404);
+    }
+    return response()->file($logPath);
 });
 
 // ✅ Test if backend is alive
@@ -85,3 +89,4 @@ Route::get('/__test-login', function () {
 });
 
 ?>
+
