@@ -31,6 +31,10 @@ Route::middleware('auth:sanctum')->group(function () {
 |--------------------------------------------------------------------------
 */
 
+Route::get('/__logs', function () {
+    return response()->file(storage_path('logs/laravel.log'));
+});
+
 // ✅ Test if backend is alive
 Route::get('/ping', function () {
     return response()->json(['status' => 'alive 🟢']);
@@ -79,3 +83,5 @@ Route::get('/__test-login', function () {
         'user' => $user->only(['id', 'email', 'name']),
     ]);
 });
+
+?>
