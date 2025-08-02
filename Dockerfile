@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y \
 # Install Composer globally
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+RUN php artisan config:clear && php artisan route:clear && php artisan cache:clear
+
+
 # Set working directory
 WORKDIR /var/www
 
