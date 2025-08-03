@@ -11,9 +11,9 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
-        sync: false
+        generateValue: true            # 🔐 Auto-generate a random key
       - key: APP_URL
-        value: https://your-backend-url.onrender.com
+        value: https://bt-xxxx.onrender.com
 
       # SQLite Setup
       - key: DB_CONNECTION
@@ -21,7 +21,7 @@ services:
       - key: DB_DATABASE
         value: /var/www/database/database.sqlite
 
-      # Mail setup (Gmail SMTP App Password)
+      # Mail setup
       - key: MAIL_MAILER
         value: smtp
       - key: MAIL_HOST
@@ -39,6 +39,6 @@ services:
       - key: MAIL_FROM_NAME
         value: "User Product App"
 
-      # Allow frontend CORS
+      # CORS whitelist
       - key: FRONTEND_URL
-        value: https://your-frontend-url.vercel.app
+        value: https://your-frontend.vercel.app
